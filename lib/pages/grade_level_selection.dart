@@ -1,3 +1,4 @@
+import 'package:enrollment_system/pages/class/enrollment_provider.dart';
 import 'package:enrollment_system/pages/parent_contact_details.dart';
 import 'package:enrollment_system/utils/bottom_design.dart';
 import 'package:enrollment_system/utils/colors.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:enrollment_system/utils/dropdown.dart';
 import 'package:enrollment_system/utils/forward_button.dart';
+import 'package:provider/provider.dart';
 
 class GradeLevelSelection extends StatefulWidget {
   const GradeLevelSelection({super.key});
@@ -17,6 +19,9 @@ class GradeLevelSelection extends StatefulWidget {
 
 class _GradeLevelSelectionState extends State<GradeLevelSelection> {
   int currentStep = 1;
+
+  String? selectedGradeLevel;
+  String? selectedStatus;
 
   void nextStep() {
     if (currentStep < 5) {
@@ -31,6 +36,27 @@ class _GradeLevelSelectionState extends State<GradeLevelSelection> {
       setState(() {
         currentStep--;
       });
+    }
+  }
+
+  //validate method
+  void _validateAndProceed() {
+    final enrollmentProvider = Provider.of<EnrollmentProvider>(context, listen: false);
+
+    if (enrollmentProvider.formData.gradeLevel.isEmpty || enrollmentProvider.formData.status.isEmpty) {
+      // Show error message if either dropdown is empty
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Please select both Grade Level and Status."),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } else {
+      // Proceed to next page
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ParentContactDetails()),
+      );
     }
   }
 
@@ -99,10 +125,7 @@ class _GradeLevelSelectionState extends State<GradeLevelSelection> {
                   padding: const EdgeInsets.only(bottom: 100, right: 20),
                   child: RoundedArrowButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ParentContactDetails()),
-                      );
+                      _validateAndProceed();
                     },
                     size: 45, // Ensures compact size
                   ),

@@ -1,4 +1,5 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
+import 'package:enrollment_system/pages/class/enrollment_provider.dart';
 import 'package:enrollment_system/pages/forgot_password.dart';
 import 'package:enrollment_system/pages/grade_level_selection.dart';
 import 'package:enrollment_system/pages/parent_contact_details.dart';
@@ -6,6 +7,7 @@ import 'package:enrollment_system/utils/bottom_design.dart';
 import 'package:enrollment_system/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'service/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,9 +23,11 @@ class _LoginState extends State<Login> {
   final ApiService apiService = ApiService();
   bool firstSwitchValue = false;
   bool isChecked = false;
+  String textFieldLabel = "Student Number";
   final TextEditingController parentNumberController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool savePassword = false;
+
 
   @override
   void initState() {
@@ -83,15 +87,16 @@ class _LoginState extends State<Login> {
   }
   @override
   Widget build(BuildContext context) {
+    final enrollmentProvider = Provider.of<EnrollmentProvider>(context, listen: false);
     return Scaffold(
         appBar: AppBar(),
+        backgroundColor: Colors.white,
         resizeToAvoidBottomInset: true,
         body: Column(
           children: [
             Expanded(
                 child: SingleChildScrollView(
                   child: Stack(
-
                     children: [
                       Column(
                         children: [
@@ -154,15 +159,19 @@ class _LoginState extends State<Login> {
                               ),
                               selectedIconScale: 1.0,
                               onChanged: (value) =>
-                                  setState(() => firstSwitchValue = value),
+                                  setState(() {
+                                    firstSwitchValue = value;
+                                    enrollmentProvider.setUserType((value ? 3:2));
+                                    textFieldLabel = value ? "Parent Number" : "Student Number";
+                                  })
                             ),
                             const SizedBox(height: 20),
                             // ID Number Input
                             Align(
                               alignment: Alignment.centerLeft,
-                              child: const Text(
-                                'Parent Number',
-                                style: TextStyle(
+                              child: Text(
+                                textFieldLabel,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   color: Color(0xFF011839),
                                 ),

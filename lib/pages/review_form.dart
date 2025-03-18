@@ -11,6 +11,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:enrollment_system/utils/dropdown.dart';
 import 'package:enrollment_system/utils/forward_button.dart';
 import 'dart:ui';
+import 'package:provider/provider.dart';
+import 'service/api_service.dart';
+import 'package:enrollment_system/pages/class/enrollment_provider.dart'; // Import your provider
 
 class ReviewFormPage extends StatefulWidget {
   @override
@@ -19,12 +22,10 @@ class ReviewFormPage extends StatefulWidget {
 
 class _ReviewFormPageState extends State<ReviewFormPage> {
   bool _isSubmitting = false; // Track submission state
-
   void _submitReview() {
     setState(() {
       _isSubmitting = true;//Show blur & dialog
     });
-    _showSuccessDialog();
   }
   void _showSuccessDialog() {
     showDialog(
@@ -33,11 +34,11 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
       barrierColor: Colors.transparent,
       builder: (BuildContext context) {
         return SuccessDialog(
-          onClose: () {
-            setState(() {
-              _isSubmitting = false; // Remove blur when dialog is dismissed
-            });
-          },
+            onClose: () {
+              setState(() {
+                _isSubmitting = false; // Remove blur when dialog is dismissed
+              });
+            },
             title: "Pre-Admission Successful",
             message: "Student enrollment request has been submitted. "
                 "You will receive an email once verification is complete."
@@ -45,55 +46,51 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
       },
     );
   }
-  // Sample Dynamic Data (Replace with Actual Data)
-  final String schoolYear = "2024-2025";
+  //register parent method
 
-  final String studentName = "Ikinamada C. Salamanca";
-
-  final String gradeLevel = "Grade 7";
-
-  final String entryStatus = "New";
-
-  final String dateOfBirth = "June 20, 2009";
-
-  final String placeOfBirth = "Cebu City";
-
-  final String gender = "Female";
-
-  final String age = "14";
-
-  final String status = "Single";
-
-  final String religion = "Roman Catholic";
-
-  final String nationality = "Filipino";
- // Sample Incorrect Data
-  final String schoolName = "University of ABCDEFGHJK";
-
-  final String datesAttended = "YYYY-YYYY";
-
-  final String lastGradeAttended = "Grade 6";
-
-  final String guardianName = "Roger John Stephan Madez";
-
-  final String address = "Forest Hills, Banawa Cebu City, Philippines, 6000";
-
-  final String cellphoneNo = "+63 929 481 8194";
-
-  final String landlineNo = "0000-0000";
-
-  final String email = "rjsm@gmail.com";
-
-  final String doc1Name = "Form 138 / Report Card";
-
-  final String doc1Filename = "Form138.pdf";
-
-  final String doc2Name = "2x2 ID Picture";
-
-  final String doc2Filename = "IDminida.jpeg";
 
   @override
   Widget build(BuildContext context) {
+    final enrollmentProvider = Provider.of<EnrollmentProvider>(context);
+    final ApiService apiService = ApiService();
+
+    Object userType = enrollmentProvider.userType ?? '';
+    String guardianFirstName = enrollmentProvider.parentFirstName ?? '';
+    String guardianLastName = enrollmentProvider.parentLastName ?? '';
+    String studentFName = enrollmentProvider.studentFirstName ?? '';
+    String studentLName = enrollmentProvider.studentLastName ?? '';
+    String bMonth = enrollmentProvider.studentBMonth ?? '';
+    String bDay = enrollmentProvider.studentBDay ?? '';
+    String bYear = enrollmentProvider.studentBYear ?? '';
+    Object guardianHouse = enrollmentProvider.houseNo ?? '';
+    Object guardianStreet = enrollmentProvider.street ?? '';
+    Object barangay = enrollmentProvider.barangay ?? '';
+    Object city = enrollmentProvider.city ?? '';
+    Object zipCode = enrollmentProvider.zipCode ?? '';
+    String guardianName = '$guardianFirstName ' '$guardianLastName';
+    String gradeLevel = enrollmentProvider.gradeLevel ?? '';
+    String entryStatus = enrollmentProvider.status ?? '';
+    String schoolYear = "";
+    String studentName = '$studentFName ' '$studentLName';
+    String dateOfBirth = '$bMonth/' '$bDay/' '$bYear';
+    String placeOfBirth = enrollmentProvider.studentBPlace;
+    String gender = enrollmentProvider.studentGender;
+    String age = enrollmentProvider.studentAge;
+    String status = enrollmentProvider.studentCivilStat;
+    String religion = enrollmentProvider.studentReligion;
+    String nationality = enrollmentProvider.studentNationality;
+    String schoolName = enrollmentProvider.nameOfSchool;
+    String datesAttended = enrollmentProvider.dateAttended;
+    String lastGradeAttended = enrollmentProvider.gradeCompleted;
+    String address = '$guardianHouse ' '$guardianStreet ' '$barangay, ' ' $city, ' '$zipCode';
+    String cellphoneNo = enrollmentProvider.cellNo ?? '';
+    String landlineNo = enrollmentProvider.landlineNo ?? '';
+    String email = enrollmentProvider.email;
+    String doc1Name = "";
+    String doc1Filename = "";
+    String doc2Name = "";
+    String doc2Filename = "";
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(),
@@ -251,11 +248,11 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          _detailsSection("Name of School: ", "University of ABCDEFGHJK"),
+                                          _detailsSection("Name of School: ", schoolName),
                                           SizedBox(height: 5),
-                                          _detailsSection("Dates Attended: ", "YYYY-YYYY"),
+                                          _detailsSection("Dates Attended: ", datesAttended),
                                           SizedBox(height: 5),
-                                          _detailsSection("Last Grade Attended: ", "Grade 6"),
+                                          _detailsSection("Last Grade Attended: ", lastGradeAttended),
                                         ],
                                       ),
                                     ),
@@ -318,8 +315,29 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                                           size: 50,
                                         ),
                                         ElevatedButton(
-                                            onPressed: (){
+                                            onPressed: () async {
                                              _submitReview();
+                                             bool success = await apiService.registerParent(
+                                                 guardianName,
+                                                 address,
+                                                 cellphoneNo,
+                                                 email,
+                                                 userType
+                                             );
+
+                                             if (success) {
+                                               _showSuccessDialog();
+                                               ScaffoldMessenger.of(context).showSnackBar(
+                                                   SnackBar(content: Text("Parent registration successful!"))
+                                               );
+                                             } else {
+                                               setState(() {
+                                                 _isSubmitting = false; // Remove blur on failure
+                                               });
+                                               ScaffoldMessenger.of(context).showSnackBar(
+                                                   SnackBar(content: Text("Parent registration failed!"))
+                                               );
+                                             }
                                             },
                                             style: ElevatedButton.styleFrom(
                                             backgroundColor: AppColors.primaryColor, // Dark navy color

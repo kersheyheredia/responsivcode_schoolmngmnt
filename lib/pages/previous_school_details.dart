@@ -1,3 +1,4 @@
+import 'package:enrollment_system/pages/class/enrollment_provider.dart';
 import 'package:enrollment_system/pages/grade_level_selection.dart';
 import 'package:enrollment_system/pages/login.dart';
 import 'package:enrollment_system/pages/personal_details.dart';
@@ -11,6 +12,7 @@ import 'package:enrollment_system/utils/colors.dart';
 import 'package:enrollment_system/utils/forward_button.dart';
 import 'package:enrollment_system/utils/bottom_design.dart';
 import 'package:enrollment_system/utils/step_progress_indicator.dart';
+import 'package:provider/provider.dart';
 
 
 class PreviousSchoolDetails extends StatefulWidget {
@@ -74,65 +76,67 @@ class _PreviousSchoolDetails extends State<PreviousSchoolDetails> {
               SizedBox(height: 30),
               /// **Scrollable Form Content**
               Expanded(
-                child: Stack(
-                  children: [
-                    /// Background Image (Part of Scrollable Content)
-                    Column(
-                      children: [
-                        SizedBox(height: 378.5), // Adjust height to position the image
-                        BottomDesign(),
-                      ],
-                    ),
-
-                    /// Foreground: Form Fields
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                child: SingleChildScrollView(
+                  child: Stack(
+                    children: [
+                      /// Background Image (Part of Scrollable Content)
+                      Column(
                         children: [
-                          Text(
-                            "Student Academic Information",
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryColor,
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                          Text("Previous School Attended",
-                              style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  color: AppColors.primaryColor
-                              )),
-                          const SizedBox(height: 15),
-                          buildTextField("Name of School"),
-                          const SizedBox(height: 15),
-                          buildTextField("Dates Attended(yyyy)"),
-                          const SizedBox(height: 15),
-                          buildTextField("Last Grade Completed"),
-
-                          const SizedBox(height: 40),
-                          Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                RoundedBackArrowButton(
-                                  onPressed: () {
-                                    Navigator.push(context,MaterialPageRoute(builder: (context) => PersonalDetails()));
-                                  },
-                                  size: 50,
-                                ),
-                                RoundedArrowButton(
-                                  onPressed: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => RequiredDocUploads()));
-                                  },
-                                  size: 50,
-                                ),
-                              ]
-                          )// Extra padding for better spacing
+                          SizedBox(height: 378.5), // Adjust height to position the image
+                          BottomDesign(),
                         ],
                       ),
-                    ),
-                  ],
+
+                      /// Foreground: Form Fields
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Student Academic Information",
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryColor,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Text("Previous School Attended",
+                                style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    color: AppColors.primaryColor
+                                )),
+                            const SizedBox(height: 15),
+                            buildTextField("Name of School", (value) => context.read<EnrollmentProvider>().setSchoolName(value)),
+                            const SizedBox(height: 15),
+                            buildTextField("Dates Attended(yyyy)", (value) => context.read<EnrollmentProvider>().setDatesAttended(value)),
+                            const SizedBox(height: 15),
+                            buildTextField("Last Grade Completed", (value) => context.read<EnrollmentProvider>().setGradeCompleted(value)),
+
+                            const SizedBox(height: 40),
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  RoundedBackArrowButton(
+                                    onPressed: () {
+                                      Navigator.push(context,MaterialPageRoute(builder: (context) => PersonalDetails()));
+                                    },
+                                    size: 50,
+                                  ),
+                                  RoundedArrowButton(
+                                    onPressed: () {
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => RequiredDocUploads()));
+                                    },
+                                    size: 50,
+                                  ),
+                                ]
+                            )// Extra padding for better spacing
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -143,7 +147,7 @@ class _PreviousSchoolDetails extends State<PreviousSchoolDetails> {
   }
 
   /// **Reusable TextField**
-  Widget buildTextField(String label) {
+  Widget buildTextField(String label, Function(String) onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -159,6 +163,7 @@ class _PreviousSchoolDetails extends State<PreviousSchoolDetails> {
         ),
         const SizedBox(height: 5), // Small gap between label and TextField
         TextFormField(
+          onChanged: onChanged,
           decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: Color(0xFF011839), width: 1.0),

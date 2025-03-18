@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DateOfBirthPicker extends StatefulWidget {
-  const DateOfBirthPicker({super.key});
+  final Function(String, String, String) onDateSelected;
+  const DateOfBirthPicker({Key? key, required this.onDateSelected}) : super(key: key);
 
   @override
   _DateOfBirthPickerState createState() => _DateOfBirthPickerState();
@@ -14,14 +15,55 @@ class _DateOfBirthPickerState extends State<DateOfBirthPicker> {
   String? selectedDay;
   String? selectedYear;
 
-  final List<String> months = [
-    "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"
-  ];
-  final List<String> days = List.generate(31, (index) => (index + 1).toString().padLeft(2, '0'));
-  final List<String> years = List.generate(100, (index) => (DateTime.now().year - index).toString());
+  List<String> months = ["mm", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+  List<String> days = ["dd"];
+  List<String> years = ["yyyy", ...List.generate(125, (index) => (2025 - index).toString())];
+
+  void initState() {
+    super.initState();
+    selectedMonth = months[0];
+    selectedDay = days[0];
+    selectedYear = years[0];
+  }
+
+  void updateDays() {
+    if (selectedMonth == "mm") {
+      setState(() => days = ["dd"]);
+      return;
+    }
+
+    int month = int.parse(selectedMonth!);
+    int maxDays = 31;
+
+    if ([4, 6, 9, 11].contains(month)) {
+      maxDays = 30;
+    } else if (month == 2) {
+      if (selectedYear != "yyyy") {
+        int year = int.parse(selectedYear!);
+        maxDays = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) ? 29 : 28;
+      } else {
+        maxDays = 28; // No leap year check if year is not selected
+      }
+    }
+
+    setState(() {
+      days = ["dd", ...List.generate(maxDays, (i) => (i + 1).toString().padLeft(2, '0'))];
+      if (!days.contains(selectedDay)) {
+        selectedDay = "dd";
+      }
+    });
+  }
+
+  void onDateChanged() {
+    if (selectedMonth != "mm" && selectedDay != "dd" && selectedYear != "yyyy") {
+      widget.onDateSelected(selectedMonth!, selectedDay!, selectedYear!);
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -45,6 +87,8 @@ class _DateOfBirthPickerState extends State<DateOfBirthPicker> {
                 onChanged: (value) {
                   setState(() {
                     selectedMonth = value;
+                    updateDays();
+                    onDateChanged();
                   });
                 },
               ),
@@ -60,6 +104,8 @@ class _DateOfBirthPickerState extends State<DateOfBirthPicker> {
                 onChanged: (value) {
                   setState(() {
                     selectedDay = value;
+                    updateDays();
+                    onDateChanged();
                   });
                 },
               ),
@@ -75,6 +121,8 @@ class _DateOfBirthPickerState extends State<DateOfBirthPicker> {
                 onChanged: (value) {
                   setState(() {
                     selectedYear = value;
+                    updateDays();
+                    onDateChanged();
                   });
                 },
               ),

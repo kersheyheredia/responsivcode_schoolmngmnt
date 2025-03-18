@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Gradle files
 .gradle/
 build/
@@ -78,4 +78,4 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
->>>>>>> 1b4cd45 (latest update/first commit)
+

@@ -1,20 +1,16 @@
+import 'package:enrollment_system/pages/class/enrollment_provider.dart';
 import 'package:enrollment_system/utils/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class CustomDropdowns extends StatefulWidget {
-  @override
-  _CustomDropdownsState createState() => _CustomDropdownsState();
-}
-
-class _CustomDropdownsState extends State<CustomDropdowns> {
-  String? selectedGrade;
-  String? selectedStatus;
-
-  List<String> gradeLevels = ['Grade 1', 'Grade 2', 'Grade 3'];
-  List<String> statuses = ['Active', 'Inactive', 'Pending'];
+class CustomDropdowns extends StatelessWidget {
+  final List<String> gradeLevels = ['Grade 1', 'Grade 2', 'Grade 3'];
+  final List<String> statuses = ['Old', 'New', 'Returnee', 'Transferee'];
 
   @override
   Widget build(BuildContext context) {
+    final enrollmentProvider = Provider.of<EnrollmentProvider>(context);
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
@@ -29,33 +25,35 @@ class _CustomDropdownsState extends State<CustomDropdowns> {
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.5),
                     blurRadius: 6,
-                    offset: Offset(0, 3), // ✅ Shadow only at the bottom
+                    offset: Offset(0, 3),
                   ),
                 ],
               ),
               child: DropdownButtonFormField<String>(
-                isExpanded: true, // ✅ Prevents overflow
+                isExpanded: true,
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                  border: InputBorder.none, // ✅ No default border
+                  border: InputBorder.none,
                 ),
-                value: selectedGrade,
+                value: enrollmentProvider.formData.gradeLevel.isNotEmpty
+                    ? enrollmentProvider.formData.gradeLevel
+                    : null,
                 hint: Text('Select Grade Level', style: TextStyle(color: AppColors.primaryColor)),
                 items: gradeLevels.map((String item) {
                   return DropdownMenuItem(value: item, child: Text(item));
                 }).toList(),
                 onChanged: (value) {
-                  setState(() {
-                    selectedGrade = value;
-                  });
+                  if (value != null) {
+                    enrollmentProvider.setGrade(value);
+                  }
                 },
                 icon: Icon(Icons.keyboard_arrow_down, color: AppColors.primaryColor),
               ),
             ),
           ),
-          SizedBox(width: 8), // ✅ Adjust spacing to prevent overflow
+          SizedBox(width: 8),
 
-          // Second Dropdown (Select Status) - Same Design as First
+          // Second Dropdown (Select Status)
           Flexible(
             child: Container(
               decoration: BoxDecoration(
@@ -65,25 +63,27 @@ class _CustomDropdownsState extends State<CustomDropdowns> {
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.5),
                     blurRadius: 6,
-                    offset: Offset(0, 3), // ✅ Shadow only at the bottom
+                    offset: Offset(0, 3),
                   ),
                 ],
               ),
               child: DropdownButtonFormField<String>(
-                isExpanded: true, // ✅ Prevents overflow
+                isExpanded: true,
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                  border: InputBorder.none, // ✅ No default border
+                  border: InputBorder.none,
                 ),
-                value: selectedStatus,
+                value: enrollmentProvider.formData.status.isNotEmpty
+                    ? enrollmentProvider.formData.status
+                    : null,
                 hint: Text('Select Status', style: TextStyle(color: AppColors.primaryColor)),
                 items: statuses.map((String item) {
                   return DropdownMenuItem(value: item, child: Text(item));
                 }).toList(),
                 onChanged: (value) {
-                  setState(() {
-                    selectedStatus = value;
-                  });
+                  if (value != null) {
+                    enrollmentProvider.setStatus(value);
+                  }
                 },
                 icon: Icon(Icons.keyboard_arrow_down, color: AppColors.primaryColor),
               ),

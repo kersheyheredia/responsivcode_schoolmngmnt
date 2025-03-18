@@ -1,3 +1,4 @@
+import 'package:enrollment_system/pages/class/enrollment_provider.dart';
 import 'package:enrollment_system/pages/grade_level_selection.dart';
 import 'package:enrollment_system/pages/intro_page.dart';
 import 'package:enrollment_system/pages/login.dart';
@@ -8,10 +9,16 @@ import 'package:enrollment_system/pages/personal_details.dart';
 import 'package:enrollment_system/pages/review_form.dart';
 import 'package:flutter/material.dart';
 import 'package:enrollment_system/utils/colors.dart';
+import 'package:provider/provider.dart';
 import 'package:enrollment_system/pages/previous_school_details.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+        create: (context)=>EnrollmentProvider(),
+      child: MyApp(),
+    )
+  );
 }
 
 class MyApp extends StatelessWidget {
