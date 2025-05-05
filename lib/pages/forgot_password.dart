@@ -1,4 +1,6 @@
+import 'package:enrollment_system/pages/email_recovery_method.dart';
 import 'package:enrollment_system/pages/forgot_password_verification.dart';
+import 'package:enrollment_system/pages/phonenum_verification_method.dart';
 import 'package:enrollment_system/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -89,7 +91,11 @@ class _ForgotPasswordScreenState extends State<ForgotPassword> {
                         ),
                       ),
                       onPressed: selectedMethod != null ? () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPasswordVerification()));
+                        if(selectedMethod == 'email'){
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => EmailRecoveryMethod()));
+                        }else if(selectedMethod == 'phone'){
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => MobileNumVerificationMethod()));
+                        }
                       } : null,
                       child: Text(
                         "Continue",

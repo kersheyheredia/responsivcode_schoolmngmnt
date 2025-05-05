@@ -1,9 +1,12 @@
 import 'dart:ui';
 
+import 'package:enrollment_system/pages/class/enrollment_provider.dart';
+import 'package:enrollment_system/pages/service/api_service.dart';
 import 'package:enrollment_system/utils/colors.dart';
 import 'package:enrollment_system/utils/success_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class ForgotPasswordReset extends StatefulWidget {
   const ForgotPasswordReset({super.key});
@@ -47,7 +50,14 @@ class _ForgotPasswordResetState extends State<ForgotPasswordReset> {
 
   @override
   Widget build(BuildContext context) {
+    final enrollmentProvider = Provider.of<EnrollmentProvider>(context, listen: false);
+    final ApiService apiService = ApiService();
+    String otp = enrollmentProvider.otp ?? '';
+    String parentNumber = enrollmentProvider.parentNumber ?? '';
+    String newPass = enrollmentProvider.newPass ?? '';
+
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(),
       body: Stack(
         children: [
@@ -88,17 +98,28 @@ class _ForgotPasswordResetState extends State<ForgotPasswordReset> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  _buildPasswordField('New Password',passwordController, _isPasswordVisible, () {
+                  _buildPasswordField('New Password',passwordController, _isPasswordVisible, ()
+                  {
                     setState(() {
                       _isPasswordVisible = !_isPasswordVisible;
-                    });
-                  }),
+                    },
+                    );
+                  }, (value) {  // ✅ Pass this function to update Provider
+                      Provider.of<EnrollmentProvider>(context, listen: false).setNewPassword(value);
+                    },
+                  ),
                   SizedBox(height: 20),
-                  _buildPasswordField('Confirm Password',confirmPasswordController, _isConfirmPasswordVisible, () {
+                  _buildPasswordField(
+                      'Confirm Password',
+                      confirmPasswordController,
+                      _isConfirmPasswordVisible, () {
                     setState(() {
                       _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
                     });
-                  }),
+                  }, (value) {  // ✅ Pass this function to update Provider
+                      Provider.of<EnrollmentProvider>(context, listen: false).setNewPassword(value);
+                    },
+                  ),
                   SizedBox(height: 100),
                   //BUTTON
                   Center(
@@ -112,9 +133,24 @@ class _ForgotPasswordResetState extends State<ForgotPasswordReset> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        onPressed: (){
-                          _submitReview();
+                        onPressed: ()async{
+                          bool isSuccess = await apiService.verifyOtpResetPass(
+                              parentNumber,
+                              otp,
+                              newPass);
+                          if (isSuccess) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Password reset successful")),
+                            );
+
+                            _submitReview();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("OTP verification failed")),
+                            );
+                          }
                         },
+
                         child: Text(
                           "Continue",
                           style: GoogleFonts.poppins(
@@ -141,8 +177,9 @@ class _ForgotPasswordResetState extends State<ForgotPasswordReset> {
       ),
     );
   }
-  Widget _buildPasswordField(String hintText, TextEditingController controller, bool isVisible, VoidCallback toggleVisibility) {
+  Widget _buildPasswordField(String hintText,TextEditingController controller, bool isVisible, VoidCallback toggleVisibility,  Function(String) onChanged) {
     return TextField(
+      onChanged: onChanged,
       controller: controller,
       obscureText: !isVisible,
       decoration: InputDecoration(

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:enrollment_system/pages/model/enrollment_form_data.dart';
 import 'package:flutter/material.dart';
 
@@ -15,9 +17,35 @@ class EnrollmentProvider with ChangeNotifier {
     _formData = newData;
     notifyListeners();
   }
+  //isResetPassword
+  void setIsResetPassword(String reset){
+    _formData.isResetPassword = reset;
+    notifyListeners();
+  }
+  //reset number
+  void setResetNumber(String resetNo){
+    _formData.resetNum=resetNo;
+    notifyListeners();
+  }
+  //otp
+  void setOtp(String otp){
+    _formData.otp = otp;
+    notifyListeners();
+  }
+  //new password
+  void setNewPassword(String newPass){
+    _formData.newPassword = newPass;
+    notifyListeners();
+  }
 
+
+  //parent number
+  void setParentNumber(String parentNumber){
+    _formData.parentNumber = parentNumber;
+    notifyListeners();
+  }
 //setters
-  void setUserType(int userType){
+  void setUserType(String userType){
     _formData.userType = userType;
     notifyListeners();
   }
@@ -180,6 +208,11 @@ class EnrollmentProvider with ChangeNotifier {
     _formData.year = year;
     notifyListeners();
   }
+
+  void setStudentDoB(String dob){
+    _formData.studentDoB = dob;
+    notifyListeners();
+  }
   void setStudentBPlace(String birthPlace){
     _formData.birthPlace = birthPlace;
     notifyListeners();
@@ -221,14 +254,30 @@ class EnrollmentProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  //uploaded documents
+  void setFormFile(File file, String fileName){
+    _formData.form138File = file;
+    _formData.formFileName = fileName;
+    notifyListeners();
+  }
+  void setPicFile(File file, String fileName){
+    _formData.picFile = file;
+    _formData.picFileName = fileName;
+    notifyListeners();
+  }
+
   //getters
+  String get otp => _formData.otp;
+  String get newPass => _formData.newPassword;
+  String get resetNumber => _formData.resetNum;
+  String get isResetPass => _formData.isResetPassword;
+  String get parentNumber => _formData.parentNumber;
   String get gradeLevel => _formData.gradeLevel;
   String get status => _formData.status;
-  int get userType => _formData.userType;
+  String get userType => _formData.userType;
   String get parentFirstName => _formData.parentFirstName;
   String get parentLastName => _formData.parentLastName;
   String get parentMiddleName => _formData.parentMiddleName;
-  String get parentDoB => _formData.parentDOB;
   String get parentSuffix => _formData.parentSuffix;
   int get parentAge => _formData.parentAge;
   String get parentGender => _formData.parentGender;
@@ -251,6 +300,7 @@ class EnrollmentProvider with ChangeNotifier {
   String get studentBMonth => _formData.month;
   String get studentBDay => _formData.day;
   String get studentBYear => _formData.year;
+  String get studentDoB => _formData.studentDoB;
   String get studentBPlace=>_formData.birthPlace;
   String get studentAge => _formData.studentAge;
   String get studentGender => _formData.studentGender;
@@ -262,6 +312,13 @@ class EnrollmentProvider with ChangeNotifier {
   String get nameOfSchool => _formData.schoolName;
   String get dateAttended => _formData.dateAttended;
   String get gradeCompleted => _formData.levelCompleted;
+
+  //getters for files
+  File? get formFile => _formData.form138File;
+  String? get fileName => _formData.formFileName;
+  File? get picFile => _formData.picFile;
+  String? get picFileName => _formData.picFileName;
+
 
   //field validate base on the step
   bool validate(int step){
@@ -315,11 +372,8 @@ class EnrollmentProvider with ChangeNotifier {
           'dateAttended',
           'levelCompleted'
         ]);
-
       default:
         return false;
     }
   }
-
-
 }

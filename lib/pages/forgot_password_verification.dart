@@ -1,12 +1,18 @@
+import 'package:enrollment_system/pages/class/enrollment_provider.dart';
 import 'package:enrollment_system/pages/forgot_password_reset.dart';
 import 'package:enrollment_system/pages/forgot_password_verification.dart';
 import 'package:enrollment_system/pages/login.dart';
+import 'package:enrollment_system/pages/service/api_service.dart';
 import 'package:enrollment_system/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class ForgotPasswordVerification extends StatefulWidget {
-  const ForgotPasswordVerification({super.key});
+  const ForgotPasswordVerification({
+    super.key,
+    //required otp
+  });
 
   @override
   State<ForgotPasswordVerification> createState() => _ForgotPasswordVerificationScreenState();
@@ -14,7 +20,7 @@ class ForgotPasswordVerification extends StatefulWidget {
 
 class _ForgotPasswordVerificationScreenState extends State<ForgotPasswordVerification> {
   String? selectedMethod;
-  List<String> otp = ["", "", "", ""]; // Stores entered OTP
+  List<String> otpp = ["", "", "", "", "", ""]; // Stores entered OTP
   int currentIndex = 0; // Tracks current OTP input position
 
   // Function to handle keypress from the custom keypad
@@ -24,10 +30,10 @@ class _ForgotPasswordVerificationScreenState extends State<ForgotPasswordVerific
         // Delete last digit
         if (currentIndex > 0) {
           currentIndex--;
-          otp[currentIndex] = "";
+          otpp[currentIndex] = "";
         }
-      } else if (currentIndex < 4) {
-        otp[currentIndex] = value;
+      } else if (currentIndex < 6) {
+        otpp[currentIndex] = value;
         currentIndex++;
       }
     });
@@ -35,6 +41,9 @@ class _ForgotPasswordVerificationScreenState extends State<ForgotPasswordVerific
 
   @override
   Widget build(BuildContext context) {
+    final enrollmentProvider = Provider.of<EnrollmentProvider>(context, listen: false);
+    final ApiService apiService = ApiService();
+    String parentNumber = enrollmentProvider.parentNumber;
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(),
@@ -79,21 +88,21 @@ class _ForgotPasswordVerificationScreenState extends State<ForgotPasswordVerific
                   SizedBox(height: 30),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(4, (index) {
+                    children: List.generate(6, (index) {
                       return Container(
-                        width: 50,
+                        width: 30,
                         height: 50,
                         margin: EdgeInsets.symmetric(horizontal: 8),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: index == currentIndex ? Colors.blue : Colors.black26,
-                            width: 2,
+                            width: 1,
                           ),
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          otp[index],
+                          otpp[index],
                           style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold),
                         ),
                       );
@@ -159,9 +168,19 @@ class _ForgotPasswordVerificationScreenState extends State<ForgotPasswordVerific
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        onPressed: () {
-                          // Verify OTP logic
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPasswordReset()));
+                        onPressed: () async {
+                          // Combine user-entered OTP into a single string
+                          String enteredOtp = otpp.join();
+                            // ✅ Navigate to the reset password page if OTP is valid
+                          enrollmentProvider.setOtp(enteredOtp);
+
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ForgotPasswordReset(),
+                              ),
+                            );
                         },
                         child: Text(
                           "Continue",

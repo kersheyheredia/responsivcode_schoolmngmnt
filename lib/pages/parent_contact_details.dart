@@ -208,7 +208,10 @@ class _ParentContactDetailsState extends State<ParentContactDetails> {
                                 Expanded(child: buildTextField("Age",
                                         (value) => context.read<EnrollmentProvider>().setParentAge(value as int))),
                                 const SizedBox(width: 10),
-                                Expanded(flex: 2, child: buildTextField("Gender", (value) => context.read<EnrollmentProvider>().setParentGender(value))),
+                                Expanded(
+                                    flex: 2,
+                                    child: buildTextField(
+                                        "Gender", (value) => context.read<EnrollmentProvider>().setParentGender(value))),
                               ],
                             ),
                             const SizedBox(height: 15),
@@ -221,7 +224,9 @@ class _ParentContactDetailsState extends State<ParentContactDetails> {
                                     // child: buildDropdownField("Date of Birth")
                                     child:  DatePickerDropdown(
                                       onDateSelected: (month, day, year) {
-                                        context.read<EnrollmentProvider>().setParentDOB("$month/$day/$year");
+                                        context.read<EnrollmentProvider>().setParentDOB(
+                                            "$year-$month-$day"
+                                        );
                                       },
                                     ),
                                 ),

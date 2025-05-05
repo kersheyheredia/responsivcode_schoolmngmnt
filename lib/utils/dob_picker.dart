@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DateOfBirthPicker extends StatefulWidget {
-  final Function(String, String, String) onDateSelected;
+  final Function(String, String, String, String) onDateSelected;
   const DateOfBirthPicker({Key? key, required this.onDateSelected}) : super(key: key);
 
   @override
@@ -56,7 +56,22 @@ class _DateOfBirthPickerState extends State<DateOfBirthPicker> {
 
   void onDateChanged() {
     if (selectedMonth != "mm" && selectedDay != "dd" && selectedYear != "yyyy") {
-      widget.onDateSelected(selectedMonth!, selectedDay!, selectedYear!);
+      //widget.onDateSelected(selectedMonth!, selectedDay!, selectedYear!);
+      String fullDate = "$selectedYear-$selectedMonth-$selectedDay";
+
+      try {
+        DateTime dob = DateTime.parse(fullDate);
+
+        // Convert to ISO8601 string format
+        String dobString = dob.toIso8601String().split('T')[0];  // "YYYY-MM-DD"
+
+        // Pass the string to EnvironmentProvider
+        widget.onDateSelected(fullDate,selectedYear!, selectedMonth!, selectedDay!);
+
+        print("Selected DOB (String): $dobString");  // For debugging
+      } catch (e) {
+        print("Invalid date: $e");
+      }
     }
   }
 

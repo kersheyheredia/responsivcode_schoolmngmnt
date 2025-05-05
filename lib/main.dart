@@ -1,16 +1,18 @@
+import 'package:enrollment_system/pages/assessment.dart';
 import 'package:enrollment_system/pages/class/enrollment_provider.dart';
-import 'package:enrollment_system/pages/grade_level_selection.dart';
-import 'package:enrollment_system/pages/intro_page.dart';
+import 'package:enrollment_system/pages/dashboard.dart';
+import 'package:enrollment_system/pages/dummy.dart';
+import 'package:enrollment_system/pages/e_grades.dart';
+import 'package:enrollment_system/pages/enrollment_process.dart';
+import 'package:enrollment_system/pages/home_page.dart';
+import 'package:enrollment_system/pages/home_screen.dart';
 import 'package:enrollment_system/pages/login.dart';
-import 'package:enrollment_system/pages/parent/account_verification.dart';
-import 'package:enrollment_system/pages/parent/register_parent.dart';
-import 'package:enrollment_system/pages/parent_contact_details.dart';
-import 'package:enrollment_system/pages/personal_details.dart';
-import 'package:enrollment_system/pages/review_form.dart';
+import 'package:enrollment_system/pages/notification_page.dart';
+import 'package:enrollment_system/pages/profile_page.dart';
+import 'package:enrollment_system/pages/subject_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:enrollment_system/utils/colors.dart';
 import 'package:provider/provider.dart';
-import 'package:enrollment_system/pages/previous_school_details.dart';
 
 void main() {
   runApp(
@@ -37,9 +39,9 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: Login()
+
     );
   }
 }
-
 
 

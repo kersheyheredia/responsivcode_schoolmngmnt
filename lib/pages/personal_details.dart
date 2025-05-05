@@ -188,10 +188,17 @@ class _PersonalDetails extends State<PersonalDetails> {
                             ),
                             SizedBox(height: 15),
                             DateOfBirthPicker(
-                                onDateSelected: (month, day, year){
-                                  context.read<EnrollmentProvider>().setStudentBMonth(month);
+                                onDateSelected: (formattedDate, year, month, day){
                                   context.read<EnrollmentProvider>().setStudentBDay(day);
+                                  context.read<EnrollmentProvider>().setStudentBMonth(month);
                                   context.read<EnrollmentProvider>().setStudentBYear(year);
+                                  context.read<EnrollmentProvider>().setStudentDoB(
+                                      "$year-${month}-${day}"
+                                  );
+
+                                  DateTime dob = DateTime.parse("$year-$month-$day");
+                                  String isoDob = dob.toIso8601String();
+                                  context.read<EnrollmentProvider>().setStudentDoB(isoDob);
                                 }
                             ),
                             const SizedBox(height: 15),

@@ -1,7 +1,10 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:enrollment_system/pages/class/enrollment_provider.dart';
+import 'package:enrollment_system/pages/enrollment_process.dart';
 import 'package:enrollment_system/pages/forgot_password.dart';
 import 'package:enrollment_system/pages/grade_level_selection.dart';
+import 'package:enrollment_system/pages/home_page.dart';
+import 'package:enrollment_system/pages/home_screen.dart';
 import 'package:enrollment_system/pages/parent_contact_details.dart';
 import 'package:enrollment_system/utils/bottom_design.dart';
 import 'package:enrollment_system/utils/colors.dart';
@@ -46,18 +49,18 @@ class _LoginState extends State<Login> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Data sent!")),
         );
-        return true; // ✅ Return success
+        return true;
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Failed to send data!")),
         );
-        return false; // ✅ Return failure
+        return false;
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Please fill out all fields!")),
       );
-      return false; // ✅ Return false when fields are empty
+      return false;
     }
   }
   // Load saved password from SharedPreferences
@@ -161,7 +164,7 @@ class _LoginState extends State<Login> {
                               onChanged: (value) =>
                                   setState(() {
                                     firstSwitchValue = value;
-                                    enrollmentProvider.setUserType((value ? 3:2));
+                                    enrollmentProvider.setUserType((value ? '3':'2'));
                                     textFieldLabel = value ? "Parent Number" : "Student Number";
                                   })
                             ),
@@ -302,7 +305,7 @@ class _LoginState extends State<Login> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                GradeLevelSelection()),
+                                                EnrollmentProcess()),
                                       );
                                     });
                                   }
@@ -358,7 +361,6 @@ class _LoginState extends State<Login> {
                      // BottomDesign(),
                     ],
                   ),
-
                 )
             )
           ],

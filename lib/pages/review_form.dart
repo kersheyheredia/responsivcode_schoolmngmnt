@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:enrollment_system/pages/parent_contact_details.dart';
 import 'package:enrollment_system/pages/required_doc_uploads.dart';
 import 'package:enrollment_system/utils/backward_button.dart';
@@ -7,6 +9,7 @@ import 'package:enrollment_system/utils/custom_header.dart';
 import 'package:enrollment_system/utils/step_progress_indicator.dart';
 import 'package:enrollment_system/utils/success_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:enrollment_system/utils/dropdown.dart';
 import 'package:enrollment_system/utils/forward_button.dart';
@@ -46,17 +49,28 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
       },
     );
   }
-  //register parent method
-
 
   @override
   Widget build(BuildContext context) {
     final enrollmentProvider = Provider.of<EnrollmentProvider>(context);
     final ApiService apiService = ApiService();
 
-    Object userType = enrollmentProvider.userType ?? '';
-    String guardianFirstName = enrollmentProvider.parentFirstName ?? '';
-    String guardianLastName = enrollmentProvider.parentLastName ?? '';
+    String userType = enrollmentProvider.userType ?? '';
+    String first_name = enrollmentProvider.parentFirstName ?? '';
+    String last_name = enrollmentProvider.parentLastName ?? '';
+    String? guardianSuffix = enrollmentProvider.parentSuffix;
+    String? guardianMiddleName = enrollmentProvider.parentMiddleName;
+    String? guardianGender = enrollmentProvider.parentGender;
+    String prefix = "sample";
+    String displayName = "kim";
+    String _status = "active";
+    String guardianBPlace = "cebu";
+    String guardianReligion="catholic";
+    String? guardianCivilStatus = enrollmentProvider.civilStat;
+    String? guardianDOB = enrollmentProvider.parentDOB;
+    String? mobileNo = enrollmentProvider.cellNo;
+    String? telephoneNo = enrollmentProvider.landlineNo;
+    String? guardianEmail = enrollmentProvider.email;
     String studentFName = enrollmentProvider.studentFirstName ?? '';
     String studentLName = enrollmentProvider.studentLastName ?? '';
     String bMonth = enrollmentProvider.studentBMonth ?? '';
@@ -67,7 +81,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
     Object barangay = enrollmentProvider.barangay ?? '';
     Object city = enrollmentProvider.city ?? '';
     Object zipCode = enrollmentProvider.zipCode ?? '';
-    String guardianName = '$guardianFirstName ' '$guardianLastName';
+    String guardianName = '$first_name ' '$last_name';
     String gradeLevel = enrollmentProvider.gradeLevel ?? '';
     String entryStatus = enrollmentProvider.status ?? '';
     String schoolYear = "";
@@ -86,10 +100,10 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
     String cellphoneNo = enrollmentProvider.cellNo ?? '';
     String landlineNo = enrollmentProvider.landlineNo ?? '';
     String email = enrollmentProvider.email;
-    String doc1Name = "";
-    String doc1Filename = "";
-    String doc2Name = "";
-    String doc2Filename = "";
+    String doc1Name = "Form138";
+    String? doc1Filename = enrollmentProvider.fileName;
+    String doc2Name = "2x2 ID";
+    String? doc2Filename = enrollmentProvider.picFileName;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -289,21 +303,33 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                                   SizedBox(height: 30),
                                   _subSectionTitle("Uploaded Documents"),
                                   SizedBox(height: 10),
-                                  Row(
-                                    children: [
-                                      _detailsSection("Document: ", doc1Name),
-                                      SizedBox(width: 30),
-                                      _detailsSection("Filename: ", doc1Filename),
-                                    ],
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      _detailsSection("Document: ", doc2Name),
-                                      SizedBox(width: 80),
-                                      _detailsSection("Filename: ", doc2Filename),
-                                    ],
-                                  ),
+
+                                 Padding(
+                                     padding: const EdgeInsets.symmetric(horizontal:  18),
+                                 child: Align(
+                                   alignment: Alignment.centerLeft,
+                                   child: Column(
+                                     crossAxisAlignment: CrossAxisAlignment.start,
+                                     children: [
+                                       //for form 138
+                                       _buildFileDisplay(
+                                         context,
+                                         label: 'Form 138',
+                                         fileName: enrollmentProvider.fileName,
+                                         filePath: enrollmentProvider.formFile?.path,
+                                       ),
+                                       SizedBox(height: 5),
+                                       //for ID
+                                       _buildFileDisplay(
+                                         context,
+                                         label: '2x2 Picture',
+                                         fileName: enrollmentProvider.picFileName,
+                                         filePath: enrollmentProvider.picFile?.path,
+                                       ),
+                                     ],
+                                   ),
+                                 ),
+                                 ),
                                   SizedBox(height: 50),
                                   Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -317,27 +343,53 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                                         ElevatedButton(
                                             onPressed: () async {
                                              _submitReview();
-                                             bool success = await apiService.registerParent(
-                                                 guardianName,
-                                                 address,
-                                                 cellphoneNo,
-                                                 email,
-                                                 userType
-                                             );
 
+                                               bool success = await apiService.registerParent(
+                                                   guardianName,
+                                                   first_name,
+                                                   last_name,
+                                                   address,
+                                                   cellphoneNo,
+                                                   email,
+                                                   studentName
+                                               );
                                              if (success) {
                                                _showSuccessDialog();
                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                   SnackBar(content: Text("Parent registration successful!"))
+                                                   SnackBar(content: Text("Pre-admission submitted successfully!"))
                                                );
                                              } else {
                                                setState(() {
-                                                 _isSubmitting = false; // Remove blur on failure
+                                                 _isSubmitting = false;
                                                });
                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                   SnackBar(content: Text("Parent registration failed!"))
+                                                   SnackBar(content: Text("Pre-admission submission failed!"))
                                                );
                                              }
+
+                                               // if(parent_id != null){
+                                               //   await apiService.registerStudent(
+                                               //     parent_id.toString(),  // You can also change registerStudent to accept int
+                                               //     studentName,
+                                               //   );
+                                               //   _showSuccessDialog();
+                                               //   ScaffoldMessenger.of(context)
+                                               //       .showSnackBar(
+                                               //       SnackBar(content: Text(
+                                               //           "Parent registration successful!"))
+                                               //   );
+                                               // } else {
+                                               //   setState(() {
+                                               //     _isSubmitting =
+                                               //     false; // Remove blur on failure
+                                               //   });
+                                               //   ScaffoldMessenger.of(context)
+                                               //       .showSnackBar(
+                                               //       SnackBar(content: Text(
+                                               //           "Parent registration failed!"))
+                                               //   );
+                                               // // }
+                                             //hfjdb
                                             },
                                             style: ElevatedButton.styleFrom(
                                             backgroundColor: AppColors.primaryColor, // Dark navy color
@@ -437,4 +489,71 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
       ),
     );
   }
+}
+
+//for the file upload
+Widget _buildFileDisplay(
+    BuildContext context, {
+      required String label,
+      required String? fileName,
+      required String? filePath,
+    }) {
+  if (fileName == null || filePath == null) {
+    return Text('$label: No file uploaded.');
+  }
+
+  String extension = fileName.split('.').last.toLowerCase();
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      GestureDetector(
+        onTap: () =>  _previewFile(context, filePath, extension),
+        // child: Text(
+        //   '$label: $fileName',
+        //   style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryColor),
+        // ),
+        child: RichText(
+          text: TextSpan(
+            style: GoogleFonts.poppins(fontSize: 10, color: Colors.black),
+            children: [
+              TextSpan(text: '$label:', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
+              TextSpan(
+                text: " ",
+              ),
+              TextSpan(text: fileName, style: GoogleFonts.poppins(color: AppColors.primaryColor)),
+            ],
+          ),
+        ),
+      )
+    ],
+  );
+}
+
+// File Preview Logic
+void _previewFile(BuildContext context, String filePath, String extension) {
+  showDialog(
+    context: context,
+    builder: (context) => Dialog(
+      insetPadding: EdgeInsets.zero,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: extension == 'pdf'
+            ? PDFView(
+          filePath: filePath,
+          enableSwipe: true,
+          swipeHorizontal: false,
+          autoSpacing: true,
+          pageFling: true,
+        )
+            : extension == 'jpg' || extension == 'png'  || extension == 'jpeg'
+            ? Image.file(File(filePath))
+            : const Center(
+          child: Text("Cannot preview this file type"),
+        ),
+      ),
+    ),
+  );
 }

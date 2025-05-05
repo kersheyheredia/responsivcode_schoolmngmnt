@@ -1,8 +1,16 @@
+import 'dart:io';
+
 class EnrollmentFormData{
+  //parent_number
+  String parentNumber = '';
+  String isResetPassword = '';
+  String resetNum='';
+  String newPassword='';
+  String otp='';
   //grade level& status
   String gradeLevel = '';
   String status ='';
-  int userType = 0;
+  String userType = '';
 
   //parent details
   String parentFirstName = '';
@@ -13,7 +21,7 @@ class EnrollmentFormData{
   bool isParentSuffixNA = false;
   int parentAge = 0;
   String parentGender = '';
-  String parentDOB= '';
+  String parentDOB = '';
   String civilStatus = '';
 
   //Contact information
@@ -34,6 +42,7 @@ class EnrollmentFormData{
   String month ='';
   String day='';
   String year='';
+  String studentDoB ='';
   String birthPlace = '';
   String studentAge='';
   String studentGender='';
@@ -47,6 +56,10 @@ class EnrollmentFormData{
   String levelCompleted='';
 
   //documents
+  File? form138File;
+  String? formFileName;
+  File? picFile;
+  String? picFileName;
 
 //validate fields
   bool areFieldsFilled(List<String> requiredFields){

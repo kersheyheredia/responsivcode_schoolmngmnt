@@ -144,6 +144,7 @@ class _RequiredDocUploads extends State<RequiredDocUploads> {
                             UploadFormCard(
                               description: "Please upload a clear image or PDF of your From 138 (Report Cart)",
                               note: 'Ensure the file is readable and includes your full name and grades.Accepted formats: JPG, PNG, or PDF (Max 5MB)',
+                              isForm138: true,
                               onPressed: (){
                               },
                             ),
@@ -160,6 +161,7 @@ class _RequiredDocUploads extends State<RequiredDocUploads> {
                               description: "Please upload a 2x2 ID picture with a white background.",
                               note: 'Your face must be clearly visible (no filters, sunglasses, or hats).'
                                   'Accepted formats: JPG, PNG (Max 2MB)',
+                              isForm138: false,
                               onPressed: (){
                               },
                             ),

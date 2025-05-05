@@ -1,23 +1,26 @@
+import 'package:enrollment_system/pages/class/enrollment_provider.dart';
 import 'package:enrollment_system/utils/colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'dart:html' as html;
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:provider/provider.dart';
 
 class UploadFormCard extends StatefulWidget {
   final String description;
   final String note;
+  final bool isForm138;
   final VoidCallback onPressed;
 
   const UploadFormCard({
     super.key,
     required this.description,
     required this.note,
-    required this.onPressed,
+    required this.isForm138,
+    required this.onPressed
   });
 
   @override
@@ -27,11 +30,15 @@ class UploadFormCard extends StatefulWidget {
 class _UploadFormCardState extends State<UploadFormCard> {
   String? selectedFileName;
   PlatformFile? selectedFile;
-  void pickFile() async {
+  File? previewFile;
+
+
+  Future<void>pickFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'png', 'pdf'],
+        withData: true
       );
 
       if (result != null) {
@@ -44,13 +51,28 @@ class _UploadFormCardState extends State<UploadFormCard> {
           return;
         }
 
+        final directory = await getTemporaryDirectory();
+        final filePath = '${directory.path}/${file.name}';
+        final newFile = File(filePath);
+        await newFile.writeAsBytes(file.bytes!);
+
         setState(() {
           selectedFileName = file.name;
           selectedFile = file;
+          previewFile = newFile;
         });
 
+        // Store the file in the provider
+        if (widget.isForm138) {
+          Provider.of<EnrollmentProvider>(context, listen: false)
+              .setFormFile(newFile, file.name);
+        } else {
+          Provider.of<EnrollmentProvider>(context, listen: false)
+              .setPicFile(newFile, file.name);
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Selected file: ${file.name}")),
+          SnackBar(content: Text("${widget.isForm138 ? "Form 138" : "2x2 Pic"} uploaded: ${file.name}")),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -64,11 +86,46 @@ class _UploadFormCardState extends State<UploadFormCard> {
       );
     }
   }
+  //preview file
+  void previewFileDialog(){
+    if(previewFile == null) return;
+
+    String extension = selectedFileName!.split('.').last.toLowerCase();
+
+    showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          insetPadding: EdgeInsets.zero,
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            child: extension == 'pdf'
+                ? PDFView(
+              filePath: previewFile!.path,
+              enableSwipe: true,
+              swipeHorizontal: false,
+              autoSpacing: true,
+              pageFling: true,
+            )
+                : extension == 'jpg' || extension == 'png'
+                ? Image.file(previewFile!)
+                : Center(
+              child: Text(
+                "Cannot preview this file type",
+                style: GoogleFonts.poppins(fontSize: 14),
+              ),
+            ),
+          ),
+        )
+    );
+  }
 
   void removeFile() {
     setState(() {
       selectedFileName = null;
       selectedFile = null;
+      previewFile = null;
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -76,38 +133,13 @@ class _UploadFormCardState extends State<UploadFormCard> {
     );
   }
 
-  void downloadFile() async {
-    if (selectedFile == null) return;
-
-    try {
-      if (kIsWeb) {
-        // Web download
-        final blob = html.Blob([selectedFile!.bytes!]);
-        final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
-          ..target = 'web-download'
-          ..download = selectedFile!.name
-          ..click();
-        html.Url.revokeObjectUrl(url);
-      } else {
-        // Mobile download - save and open the file
-        final directory = await getApplicationDocumentsDirectory();
-        final filePath = '${directory.path}/${selectedFile!.name}';
-        final file = File(filePath);
-
-        await file.writeAsBytes(selectedFile!.bytes!);
-        await OpenFile.open(filePath);
-      }
-    } catch (e) {
-      print("Error downloading file: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error downloading file: $e")),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    //fot file name trimming
+    String trimmedFileName(String fileName, {int maxLength = 30}){
+      if(fileName.length <= maxLength) return fileName;
+      return '${fileName.substring(0, maxLength)}...';
+    }
     return Container(
       padding: const EdgeInsets.all(14.0),
       decoration: BoxDecoration(
@@ -151,14 +183,16 @@ class _UploadFormCardState extends State<UploadFormCard> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Clickable File Name for download
-                GestureDetector(
-                  onTap: downloadFile,
-                  child: Text(
-                    '📥 $selectedFileName',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
+                Tooltip(
+                  message: selectedFileName!,
+                  child: GestureDetector(
+                    onTap: previewFileDialog,
+                    child: Text(
+                      '👁️ ${trimmedFileName(selectedFileName!)}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.blue,
+                      ),
                     ),
                   ),
                 ),
